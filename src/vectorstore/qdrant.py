@@ -27,11 +27,11 @@ class RetrievedChunk:
     page_end: int | None
     chunk_type: str | None
     score: float | None
-
+   
 
 def create_qdrant_client(settings: Settings) -> QdrantClient:
     if settings.qdrant_url:
-        return QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key)
+        return QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key, timeout=120)
     if settings.qdrant_path:
         return QdrantClient(path=settings.qdrant_path)
     return QdrantClient(":memory:")
@@ -91,8 +91,8 @@ class QdrantRepository:
             )
             for i, (doc, vector) in enumerate(zip(documents, vectors))
         ]
-        for start in range(0, len(points), 256):
-            self.client.upsert(self.collection, points[start : start + 256], wait=True)
+        for start in range(0, len(points), 64):
+            self.client.upsert(self.collection, points[start : start + 64], wait=True)
         return len(points)
 
     def search(self, vector: list[float], k: int) -> list[RetrievedChunk]:
