@@ -18,6 +18,11 @@ def formatear_contexto(chunks: list[RetrievedChunk]) -> str:
         partes.append(f"[Fragmento {i}] ({chunk.document_name}{pagina})\n{chunk.text}")
     return "\n\n".join(partes)
 
+def extraer_respuesta_final(texto: str) -> str:
+        marca = "Respuesta final:"
+        if marca in texto:
+            return texto.split(marca, 1)[1].strip()
+        return texto.strip()
 
 class RagService:
     def __init__(self, embedder, repository: QdrantRepository, llm: Runnable, k: int):
@@ -25,6 +30,7 @@ class RagService:
         self.repository = repository
         self.llm = llm
         self.k = k
+
 
     def retrieve(self, question: str) -> list[RetrievedChunk]:
         vector = self.embedder.embed_query(question)
@@ -34,4 +40,5 @@ class RagService:
         if not chunks:
             return SIN_CONTEXTO
         chain = template | self.llm | StrOutputParser()
-        return chain.invoke({"pregunta": question, "contexto": formatear_contexto(chunks)})
+        respuesta = chain.invoke({"pregunta": question, "contexto": formatear_contexto(chunks)})
+        return extraer_respuesta_final(respuesta)

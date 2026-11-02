@@ -13,7 +13,7 @@ def _require_api_key(settings: Settings) -> str:
 
 
 def get_llm(settings: Settings) -> ChatOpenRouter:
-    return ChatOpenRouter(model=settings.llm_model, api_key=_require_api_key(settings))
+    return ChatOpenRouter(model=settings.llm_model, api_key=_require_api_key(settings), temperature=0)
 
 
 def get_embeddings(settings: Settings) -> OpenAIEmbeddings:
